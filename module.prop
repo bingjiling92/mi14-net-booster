@@ -1,0 +1,6 @@
+id=mi14_net_booster
+name=小米14 移动网络优化 (Network Booster)
+version=v3.2
+versionCode=320
+author=bingjiling92
+description=小米14(SM8650/SDR753)移动网络优化与稳定性守护 v3.2 硬件能力对齐版：实测本机可优化项=发送队列深度(全动态承载,存原值)/MTU(默认不干预,可选clamp+weak)/NAPI-GRO批量(默认关)/数据面守护/温度观测。删除 7 个本机无消费方的基带属性写入(详见 capabilities.txt)。与 netfix_allinone 完全分权(不碰 TCP/DNS/iptables/RPS/XPS)。

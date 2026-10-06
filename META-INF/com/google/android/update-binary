@@ -1,0 +1,53 @@
+#!/sbin/sh
+#################
+# mi14_net_booster v3.2 安装器
+#################
+umask 022
+ui_print() { echo "$1"; }
+set_perm() { chown $1:$2 $3; chmod $4 $5; }
+set_perm_recursive() { chown -R $1:$2 $3; chmod -R $4 $5; }
+
+OUTFD=$2
+ZIPFILE=$3
+
+ui_print "************************************************"
+ui_print "   小米14 移动网络优化 v3.2 (硬件能力对齐版)"
+ui_print "************************************************"
+ui_print ""
+ui_print "- 设备: $(getprop ro.product.model) ($getprop ro.product.device)"
+if [ "$(getprop ro.product.device)" != "houji" ]; then
+  ui_print "! 警告: 非小米14(houji)，部分节点可能不存在"
+  sleep 2
+else
+  ui_print "- 机型校验通过"
+fi
+
+if [ -d /data/adb/modules/netfix_allinone ] && [ ! -f /data/adb/modules/netfix_allinone/disable ]; then
+  ui_print "- 检测到 netfix_allinone: 已按分权约定放弃 TCP/DNS/iptables/RPS/XPS"
+fi
+
+# 承载层节点实测
+_ok=0
+for i in /sys/class/net/rmnet_data*; do
+  [ -w "$i/tx_queue_len" ] && _ok=$((_ok+1))
+done
+ui_print "- 可写承载接口: $_ok 个"
+if [ -w /sys/class/net/rmnet_data0/gro_flush_timeout ]; then
+  ui_print "- NAPI/GRO 批量节点: 可用(默认关闭)"
+else
+  ui_print "! NAPI/GRO 批量节点: 不可用(将自动跳过)"
+fi
+ui_print "- 基带属性: 本机未验证消费方, 默认不写入"
+
+# 目录准备(文件已由管理器解压到 $MODPATH)
+mkdir -p /data/adb/mi14_net_booster/orig
+set_perm_recursive $MODPATH 0 0 0755 0644
+set_perm $MODPATH/service.sh 0 0 0755
+set_perm $MODPATH/uninstall.sh 0 0 0755
+set_perm $MODPATH/META-INF/com/google/android/update-binary 0 0 0755
+
+ui_print ""
+ui_print "- 安装完成, 重启生效"
+ui_print "- 能力自检报告: /data/adb/mi14_net_booster/capabilities.txt"
+ui_print "- 重新自检: su -c 'sh /data/adb/modules/mi14_net_booster/service.sh probe'"
+ui_print ""
